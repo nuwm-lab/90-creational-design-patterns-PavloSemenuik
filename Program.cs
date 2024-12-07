@@ -3,6 +3,9 @@
 namespace BuildingBlocksFactory
 {
     // Базовий інтерфейс для блоків
+    /// <summary>
+    /// Інтерфейс для всіх типів будівельних блоків.
+    /// </summary>
     interface IBuildingBlock
     {
         void Display();
@@ -34,6 +37,8 @@ namespace BuildingBlocksFactory
 
         public RoundBlock(double radius)
         {
+            if (radius <= 0)
+                throw new ArgumentException("Радіус має бути більшим за нуль.");
             Radius = radius;
         }
 
@@ -50,6 +55,8 @@ namespace BuildingBlocksFactory
 
         public SquareBlock(double sideLength)
         {
+            if (sideLength <= 0)
+                throw new ArgumentException("Сторона має бути більшою за нуль.");
             SideLength = sideLength;
         }
 
@@ -67,6 +74,8 @@ namespace BuildingBlocksFactory
 
         public TriangleBlock(double baseLength, double height)
         {
+            if (baseLength <= 0 || height <= 0)
+                throw new ArgumentException("Основа та висота мають бути більшими за нуль.");
             Base = baseLength;
             Height = height;
         }
@@ -138,42 +147,67 @@ namespace BuildingBlocksFactory
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Оберіть тип будівельного блоку:");
-            Console.WriteLine("1 - Круглий блок");
-            Console.WriteLine("2 - Квадратний блок");
-            Console.WriteLine("3 - Трикутний блок");
-            Console.Write("Ваш вибір: ");
-            string userChoice = Console.ReadLine();
-
-            IBuildingBlockFactory factory;
-
-            switch (userChoice)
+            try
             {
-                case "1":
-                    Console.Write("Введіть радіус: ");
-                    double radius = Convert.ToDouble(Console.ReadLine());
-                    factory = new RoundBlockFactory(radius);
-                    break;
-                case "2":
-                    Console.Write("Введіть довжину сторони: ");
-                    double side = Convert.ToDouble(Console.ReadLine());
-                    factory = new SquareBlockFactory(side);
-                    break;
-                case "3":
-                    Console.Write("Введіть довжину основи: ");
-                    double baseLength = Convert.ToDouble(Console.ReadLine());
-                    Console.Write("Введіть висоту: ");
-                    double height = Convert.ToDouble(Console.ReadLine());
-                    factory = new TriangleBlockFactory(baseLength, height);
-                    break;
-                default:
-                    Console.WriteLine("Неправильний вибір!");
-                    return;
-            }
+                Console.WriteLine("Оберіть тип будівельного блоку:");
+                Console.WriteLine("1 - Круглий блок");
+                Console.WriteLine("2 - Квадратний блок");
+                Console.WriteLine("3 - Трикутний блок");
+                Console.Write("Ваш вибір: ");
+                string userChoice = Console.ReadLine();
 
-            // Створення блоку і його відображення
-            IBuildingBlock block = factory.CreateBlock();
-            block.Display();
+                IBuildingBlockFactory factory;
+
+                switch (userChoice)
+                {
+                    case "1":
+                        double radius = GetPositiveDouble("Введіть радіус: ");
+                        factory = new RoundBlockFactory(radius);
+                        break;
+                    case "2":
+                        double side = GetPositiveDouble("Введіть довжину сторони: ");
+                        factory = new SquareBlockFactory(side);
+                        break;
+                    case "3":
+                        double baseLength = GetPositiveDouble("Введіть довжину основи: ");
+                        double height = GetPositiveDouble("Введіть висоту: ");
+                        factory = new TriangleBlockFactory(baseLength, height);
+                        break;
+                    default:
+                        Console.WriteLine("Неправильний вибір!");
+                        return;
+                }
+
+                // Створення блоку і його відображення
+                IBuildingBlock block = factory.CreateBlock();
+                block.Display();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Помилка: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Запитує у користувача позитивне число з повідомленням.
+        /// </summary>
+        /// <param name="message">Повідомлення для користувача.</param>
+        /// <returns>Позитивне число.</returns>
+        private static double GetPositiveDouble(string message)
+        {
+            double value;
+            do
+            {
+                Console.Write(message);
+                string input = Console.ReadLine();
+
+                if (double.TryParse(input, out value) && value > 0)
+                {
+                    return value;
+                }
+
+                Console.WriteLine("Будь ласка, введіть коректне число більше за нуль.");
+            } while (true);
         }
     }
 }
