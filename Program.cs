@@ -2,65 +2,134 @@
 
 namespace BuildingBlocksFactory
 {
-    // Абстрактний продукт
-    abstract class BuildingBlock
+    // Базовий інтерфейс для блоків
+    interface IBuildingBlock
     {
-        public abstract void Display();
+        void Display();
     }
 
-    // Конкретні продукти
-    class RoundBlock : BuildingBlock
+    // Інтерфейс для круглих блоків
+    interface IRoundBlock : IBuildingBlock
     {
-        public override void Display()
+        double Radius { get; }
+    }
+
+    // Інтерфейс для квадратних блоків
+    interface ISquareBlock : IBuildingBlock
+    {
+        double SideLength { get; }
+    }
+
+    // Інтерфейс для трикутних блоків
+    interface ITriangleBlock : IBuildingBlock
+    {
+        double Base { get; }
+        double Height { get; }
+    }
+
+    // Реалізація круглих блоків
+    class RoundBlock : IRoundBlock
+    {
+        public double Radius { get; }
+
+        public RoundBlock(double radius)
         {
-            Console.WriteLine("Це круглий будівельний блок.");
+            Radius = radius;
+        }
+
+        public void Display()
+        {
+            Console.WriteLine($"Круглий блок: Радіус = {Radius}");
         }
     }
 
-    class SquareBlock : BuildingBlock
+    // Реалізація квадратних блоків
+    class SquareBlock : ISquareBlock
     {
-        public override void Display()
+        public double SideLength { get; }
+
+        public SquareBlock(double sideLength)
         {
-            Console.WriteLine("Це квадратний будівельний блок.");
+            SideLength = sideLength;
+        }
+
+        public void Display()
+        {
+            Console.WriteLine($"Квадратний блок: Сторона = {SideLength}");
         }
     }
 
-    class TriangleBlock : BuildingBlock
+    // Реалізація трикутних блоків
+    class TriangleBlock : ITriangleBlock
     {
-        public override void Display()
+        public double Base { get; }
+        public double Height { get; }
+
+        public TriangleBlock(double baseLength, double height)
         {
-            Console.WriteLine("Це трикутний будівельний блок.");
+            Base = baseLength;
+            Height = height;
+        }
+
+        public void Display()
+        {
+            Console.WriteLine($"Трикутний блок: Основа = {Base}, Висота = {Height}");
         }
     }
 
     // Абстрактна фабрика
     interface IBuildingBlockFactory
     {
-        BuildingBlock CreateBlock();
+        IBuildingBlock CreateBlock();
     }
 
-    // Конкретні фабрики
+    // Параметризована фабрика для круглих блоків
     class RoundBlockFactory : IBuildingBlockFactory
     {
-        public BuildingBlock CreateBlock()
+        private readonly double _radius;
+
+        public RoundBlockFactory(double radius)
         {
-            return new RoundBlock();
+            _radius = radius;
+        }
+
+        public IBuildingBlock CreateBlock()
+        {
+            return new RoundBlock(_radius);
         }
     }
 
+    // Параметризована фабрика для квадратних блоків
     class SquareBlockFactory : IBuildingBlockFactory
     {
-        public BuildingBlock CreateBlock()
+        private readonly double _sideLength;
+
+        public SquareBlockFactory(double sideLength)
         {
-            return new SquareBlock();
+            _sideLength = sideLength;
+        }
+
+        public IBuildingBlock CreateBlock()
+        {
+            return new SquareBlock(_sideLength);
         }
     }
 
+    // Параметризована фабрика для трикутних блоків
     class TriangleBlockFactory : IBuildingBlockFactory
     {
-        public BuildingBlock CreateBlock()
+        private readonly double _baseLength;
+        private readonly double _height;
+
+        public TriangleBlockFactory(double baseLength, double height)
         {
-            return new TriangleBlock();
+            _baseLength = baseLength;
+            _height = height;
+        }
+
+        public IBuildingBlock CreateBlock()
+        {
+            return new TriangleBlock(_baseLength, _height);
         }
     }
 
@@ -81,21 +150,29 @@ namespace BuildingBlocksFactory
             switch (userChoice)
             {
                 case "1":
-                    factory = new RoundBlockFactory();
+                    Console.Write("Введіть радіус: ");
+                    double radius = Convert.ToDouble(Console.ReadLine());
+                    factory = new RoundBlockFactory(radius);
                     break;
                 case "2":
-                    factory = new SquareBlockFactory();
+                    Console.Write("Введіть довжину сторони: ");
+                    double side = Convert.ToDouble(Console.ReadLine());
+                    factory = new SquareBlockFactory(side);
                     break;
                 case "3":
-                    factory = new TriangleBlockFactory();
+                    Console.Write("Введіть довжину основи: ");
+                    double baseLength = Convert.ToDouble(Console.ReadLine());
+                    Console.Write("Введіть висоту: ");
+                    double height = Convert.ToDouble(Console.ReadLine());
+                    factory = new TriangleBlockFactory(baseLength, height);
                     break;
                 default:
                     Console.WriteLine("Неправильний вибір!");
                     return;
             }
 
-            // Створюємо блок через фабрику
-            BuildingBlock block = factory.CreateBlock();
+            // Створення блоку і його відображення
+            IBuildingBlock block = factory.CreateBlock();
             block.Display();
         }
     }
